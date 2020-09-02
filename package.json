@@ -1,12 +1,11 @@
 {
-  "name": "node-ts-quick-start",
+  "name": "mini-mobx",
   "version": "1.0.0",
-  "description": "node ts quick start",
+  "description": "Mini Mobx",
   "keywords": [
-    "node",
     "ts",
     "typescript",
-    "quick start"
+    "mobx"
   ],
   "main": "dist/index.js",
   "types": "dist/types/index.d.ts",
@@ -18,7 +17,7 @@
   "repository": {
     "type": "git",
     "author": "Rain120",
-    "url": "git+https://github.com/Rain120/node-ts-quick-start.git"
+    "url": "git+https://github.com/Rain120/mini-mobx.git"
   },
   "scripts": {
     "test": "jest --passWithNoTests",
@@ -27,7 +26,7 @@
     "test:watchAll": "jest --coverage --watchAll",
     "eslint": "eslint --fix --color src/**/**",
     "prettier": "prettier --write  src/**/**",
-    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
+    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0 && git add .",
     "lint-staged": "lint-staged",
     "typedoc": "typedoc --out docs --target es6 --theme minimal --mode file src",
     "prebuild": "rimraf dist",
@@ -46,7 +45,7 @@
   "husky": {
     "hooks": {
       "pre-commit": [
-        "lint-staged"
+        "npm run changelog && lint-staged"
       ],
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
