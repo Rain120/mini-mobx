@@ -9,7 +9,8 @@ module.exports = {
   rootDir: './',
   roots: ['<rootDir>/src'],
   testEnvironment: 'node',
-  testMatch: ['**/**/__tests__.[jt]s?(x)', '**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[tj]s?(x)'],
+  // testMatch: ['**/**/__tests__.[jt]s?(x)', '**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[tj]s?(x)'],
+  testMatch: ['/**test/**/*.[jt]s?(x)'],
   testPathIgnorePatterns: ['/node_modules/'],
   transform: {
     '^.+\\.(ts|tsx)$': 'ts-jest',

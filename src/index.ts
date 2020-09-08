@@ -1,12 +1,8 @@
 /*
  * @Author: Rainy
- * @Date: 2020-06-05 17:59:22
+ * @Date: 2020-09-02 13:04:16
  * @LastEditors: Rainy
- * @LastEditTime: 2020-06-11 17:01:04
+ * @LastEditTime: 2020-09-06 22:21:58
  */
 
-function add(a: number, b: number): number {
-  return a + b;
-}
-
-export default add;
+export { observable } from './internal';
