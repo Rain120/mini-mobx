@@ -1,9 +1,11 @@
 {
   "printWidth": 120,
-  "trailingComma": "all",
+  "尾逗号": "none / es5 / all",
+  "trailingComma": "none",
   "tabWidth": 2,
   "semi": true,
   "singleQuote": true,
+  "括号空格": "",
   "bracketSpacing": true,
   "arrowParens": "avoid"
 }

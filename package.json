@@ -40,8 +40,9 @@
     "lint-staged": "lint-staged",
     "typedoc": "typedoc --out docs --target es6 --theme minimal --mode file src",
     "prebuild": "rimraf dist",
-    "build:tsc": "tsc --pretty",
-    "build": "node ./scripts/build.js",
+    "build:tsc": "rm -rf lib && tsc --pretty",
+    "mv:file": "sh ./scripts/after-build.sh",
+    "build": "tsdx build --entry src/mobx.ts --name mobx --format esm,cjs,umd && npm run mv:file lib",
     "dev": "npm run dist -- -w"
   },
   "engines": {
@@ -86,6 +87,7 @@
     "rollup-plugin-terser": "^7.0.2",
     "ts-jest": "^26.1.0",
     "ts-node": "^8.10.2",
+    "tsdx": "^0.13.3",
     "typedoc": "^0.17.7",
     "typescript": "^3.9.5"
   }
