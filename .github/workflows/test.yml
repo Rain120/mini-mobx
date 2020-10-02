@@ -20,7 +20,10 @@ jobs:
 
       - name: Install and Build
         run: |
-          npm ci
+          # must have lock version file
+          # npm ci
+          npm install
+          # do test
           # npm run docs:build
       # - name: Deploy
       #   uses: JamesIves/github-pages-deploy-action@master
