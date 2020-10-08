@@ -1,5 +1,5 @@
 {
-  "printWidth": 120,
+  "printWidth": 100,
   "尾逗号": "none / es5 / all",
   "trailingComma": "none",
   "tabWidth": 2,

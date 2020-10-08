@@ -1,6 +1,6 @@
-# 装饰器
+### decorators 装饰器
 
-MobX 有一组装饰器来定义 _observable_ 属性的行为。
+`MobX` 有一组装饰器来定义 _observable_ 属性的行为。
 
 - `observable`: `observable.deep` 的别名
 
@@ -26,13 +26,13 @@ MobX 有一组装饰器来定义 _observable_ 属性的行为。
 
 装饰器可以使用 API `decorate`、`observable.object`、`extendObservable` 和 `observable` (创建对象时) 来指定对象成员的行为。如果没有传入装饰器, 默认为对任意键值对使用 `observable.deep`, 对 getters 使用 `computed`。
 
-## 深层可观察性
+#### 深层可观察性
 
 当 MobX 创建一个 _observable_ 对象时, (使用 `observable`、 `observable.object` 或 `extendObservable`), 它引入的 _observable_ 属性默认是使用 `deep` 调节器的。`deep` 调节器主要是为任何新分配的值递归调用 `observable(newValue)`。会依次使用 `deep` 调节器…你可以想象。
 
 这是一个非常便利的默认设置。无需额外的工作, 分配给 _observable_ 的所有值本身也将转变成 _observable_(除非它们已经是), 因此不需要额外的工作就可使对象转变成深 _observable_。
 
-## 引用可观察性
+#### 引用可观察性
 
 然后在某些情况下, 不需要将对象转变成 _observable_。典型案例就是不可变对象, 或者不是由你管理, 而是由外部库管理的对象。例如 JSX 元素、DOM 元素、像 History、window 这样的原生对象, 等等。对于这类对象, 只需要存储引用而不用把它们转变成 _observable_。
 
@@ -64,7 +64,7 @@ function Message() {
 
 注意, 可以通过使用 `const box = observable.shallowBox（value）` 来创建一个装箱的 _observable_ 引用
 
-## 浅层可观察性
+#### 浅层可观察性
 
 `observable.shallow` 调节器会应用“单层”可观察性。如果想创建一个 _observable_ 引用的**集合**, 那你会需要它。如果新集合分配给具有此调节器的属性, 那么它会转变成 _observable_, 但它的值将保持原样, 不同于 `deep` 的是它不会递归。示例:
 
