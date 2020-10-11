@@ -2,10 +2,10 @@
  * @Author: Rainy
  * @Date: 2020-09-20 11:44:33
  * @LastEditors: Rainy
- * @LastEditTime: 2020-10-07 16:14:48
+ * @LastEditTime: 2020-10-09 19:48:42
  */
 
-import { defineProperty, globalState, isObjectLike, objectPrototype } from '../internal';
+import { defineProperty, globalState, isObjectLike, Lambda, objectPrototype } from '../internal';
 
 export const EMPTY_ARRAY = [];
 Object.freeze(EMPTY_ARRAY);
@@ -40,4 +40,21 @@ export function createInstanceofPredicate<T>(
   return function (x) {
     return isObjectLike(x) && x[propName] === true;
   } as any;
+}
+/**
+ * @description 确保所提供的函数最多被调用一次
+ * @param  {Lambda} fn
+ * @returns Lambda
+ */
+export function once(fn: Lambda): Lambda {
+  let invoked = false;
+
+  return function () {
+    if (invoked) {
+      return;
+    }
+
+    invoked = true;
+    return (fn as any).apply(this, arguments);
+  };
 }
