@@ -3,6 +3,7 @@
   "尾逗号": "none / es5 / all",
   "trailingComma": "none",
   "tabWidth": 2,
+  "分号": "",
   "semi": true,
   "singleQuote": true,
   "括号空格": "",

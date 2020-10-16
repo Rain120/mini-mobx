@@ -2,7 +2,7 @@
  * @Author: Rainy
  * @Date: 2020-09-05 10:47:44
  * @LastEditors: Rainy
- * @LastEditTime: 2020-09-06 21:44:55
+ * @LastEditTime: 2020-10-06 11:23:54
  */
 
 import {
@@ -11,13 +11,29 @@ import {
   isUniqueStringLike,
   isObservable,
   isPlainObject,
-  isES6Map,
-  IObservableArray,
+  // isES6Map,
+  // IObservableArray,
   ObservableValue,
   IEnhancer,
   deepEnhancer,
   referenceEnhancer,
-} from 'src/internal';
+  createDecorator,
+  storeDecorator,
+  AnnotationsMap,
+  Annotation,
+  asObservableObject,
+  createDynamicObservableObject,
+  extendObservable,
+  globalState,
+  reportError,
+  shallowEnhancer,
+  refStructEnhancer
+} from '../internal';
+
+export const OBSERVABLE = 'observable';
+export const OBSERVABLE_REF = 'observable.ref';
+export const OBSERVABLE_SHALLOW = 'observable.shallow';
+export const OBSERVABLE_STRUCT = 'observable.struct';
 
 export interface CreateObservableOptions {
   name?: string;
@@ -29,12 +45,12 @@ export interface CreateObservableOptions {
 export const defaultObservableOptions: CreateObservableOptions = {
   name: undefined,
   deep: true,
-  proxy: true,
+  proxy: true
 };
 
 Object.freeze(defaultObservableOptions);
 
-export function createObserverOptions(thing: any): CreateObservableOptions {
+export function asCreateObservableOptions(thing: any): CreateObservableOptions {
   return thing || defaultObservableOptions;
 }
 
@@ -42,8 +58,20 @@ export function getEnhancerFromOptions(options: CreateObservableOptions): IEnhan
   return options.deep === true ? deepEnhancer : referenceEnhancer;
 }
 
+const annotationToEnhancer = {
+  [OBSERVABLE]: deepEnhancer,
+  [OBSERVABLE_REF]: referenceEnhancer,
+  [OBSERVABLE_SHALLOW]: shallowEnhancer,
+  [OBSERVABLE_STRUCT]: refStructEnhancer
+};
+export function getEnhancerFromAnnotation(annotation?: Annotation): IEnhancer<any> {
+  return !annotation
+    ? deepEnhancer
+    : annotationToEnhancer[annotation.annotationType] ?? reportError('Invalid annotation');
+}
+
 // LINK_TO: https://mobx.js.org/refguide/observable.html
-export interface ObservableFactories {
+export interface IObservableFactory extends Annotation, PropertyDecorator {
   box<T = any>(value?: T, options?: CreateObservableOptions): IObservableValue<T>;
   // array<T = any>(
   //   initialValues?: T[],
@@ -55,10 +83,13 @@ export interface ObservableFactories {
   // ): IObservableValue<T>;
   object<T = any>(
     prop?: T,
-    // TODO: 暂时不管 decorator
-    decorator?: any,
-    options?: CreateObservableOptions,
+    decorator?: AnnotationsMap<T, never>,
+    options?: CreateObservableOptions
   ): T;
+  deep: Annotation & PropertyDecorator;
+  ref: Annotation & PropertyDecorator;
+  shallow: Annotation & PropertyDecorator;
+  struct: Annotation & PropertyDecorator;
 }
 
 /**
@@ -69,8 +100,7 @@ export interface ObservableFactories {
 function createObservable(value: any, arg2: any, arg3: any) {
   // decorator
   if (isUniqueStringLike(arg2)) {
-    // decorator apply
-    // 没写的话, assign 可能会报错
+    storeDecorator(value, arg2, OBSERVABLE);
     return;
   }
 
@@ -81,11 +111,11 @@ function createObservable(value: any, arg2: any, arg3: any) {
   const res = isPlainObject(value)
     ? observable.object(value)
     : // : Array.isArray(value)
-  // ? observable.array(value)
-  // // TODO: map 考虑的东西太多了，暂时先不做
-  // : false && isES6Map(value)
-  // ? observable.map(value, arg2)
-    value;
+      // ? observable.array(value)
+      // // TODO: map 考虑的东西太多了，暂时先不做
+      // : false && isES6Map(value)
+      // ? observable.map(value, arg2)
+      value;
 
   if (res !== value) {
     return res;
@@ -94,9 +124,9 @@ function createObservable(value: any, arg2: any, arg3: any) {
   return observable.box(value);
 }
 
-const observableFactories: ObservableFactories = {
+const observableFactories: IObservableFactory = {
   box<T = any>(value?: T, options?: CreateObservableOptions): IObservableValue<T> {
-    const opts = createObserverOptions(options);
+    const opts = asCreateObservableOptions(options);
     return new ObservableValue(value, getEnhancerFromOptions(opts), opts.name);
   },
   // array<T = any>(value, options?: CreateObservableOptions) {
@@ -105,10 +135,29 @@ const observableFactories: ObservableFactories = {
   // map(value, options?: CreateObservableOptions) {
   //   return {};
   // }
-  object<T = any>(value?: T, decorator?: any, options?: CreateObservableOptions): T {
-    return {} as any;
+  object<T = any>(
+    props?: T,
+    decorators?: AnnotationsMap<T, never>,
+    options?: CreateObservableOptions
+  ): T {
+    const opts = asCreateObservableOptions(options);
+    const base = {};
+    asObservableObject(base, options?.name, getEnhancerFromOptions(opts));
+
+    return extendObservable(
+      globalState.useProxies === false || opts.proxy === false
+        ? base
+        : createDynamicObservableObject(base),
+      props,
+      decorators,
+      options
+    );
   },
+  deep: createDecorator(OBSERVABLE),
+  ref: createDecorator(OBSERVABLE_REF),
+  shallow: createDecorator(OBSERVABLE_SHALLOW),
+  struct: createDecorator(OBSERVABLE_STRUCT)
 } as any;
 
 // eslint-disable-next-line
-export var observable: ObservableFactories = assign(createObservable, observableFactories);
+export var observable: IObservableFactory = assign(createObservable, observableFactories);

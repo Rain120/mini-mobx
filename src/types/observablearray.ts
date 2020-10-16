@@ -5,7 +5,7 @@
  * @LastEditTime: 2020-09-06 18:10:32
  */
 
-import { isObservable, $mobx } from 'src/internal';
+import { isObservable, $mobx } from '../internal';
 
 export interface IObservableArray<T = any> extends Array<T> {
   spliceWithArray(index: number, deleteCount?: number, newItems?: T[]): T[];

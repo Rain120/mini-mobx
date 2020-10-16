@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mini Mobx</title>
+</head>
+<body>
+  <h1>Mobx</h1>
+  <script src="../dist/mobx.cjs.development.js"></script>
+  <script type='module'>
+    const profile = observable({
+        name: 'Rain120',
+        age: 18,
+        skills: [
+            {
+                name: 'react',
+                score: 75
+            },
+            {
+                name: 'mobx',
+                score: 70
+            }
+        ]
+    });
+    autorun(() => {
+        console.log(profile.name)
+    });
+
+    profile.name = 'Rainy';
+  </script>
+</body>
+</html>

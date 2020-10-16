@@ -2,21 +2,21 @@
  * @Author: Rainy
  * @Date: 2020-09-05 16:56:31
  * @LastEditors: Rainy
- * @LastEditTime: 2020-09-06 21:52:07
+ * @LastEditTime: 2020-09-21 19:44:58
  */
 
 import {
-  observable,
+  // observable,
   Atom,
   $mobx,
-  CreateObservableOptions,
+  // CreateObservableOptions,
   toPrimitive,
   comparer,
   globalState,
   IEqualsComparer,
   IUNCHANGED,
   IEnhancer,
-} from 'src/internal';
+} from '../internal';
 
 export interface IObservableValue<T> {
   get(): T;

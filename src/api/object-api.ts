@@ -5,9 +5,7 @@
  * @LastEditTime: 2020-09-06 17:33:17
  */
 
-import {
-  $mobx, isObservableObject, isObservableArray, reportError, isNumber, isObservableMap,
-} from 'src/internal';
+import { $mobx, isObservableObject, isObservableArray, reportError, isNumber, isObservableMap } from '../internal';
 
 export function set(obj: any, key: any, value?: any): void {
   if (arguments.length === 2) {
@@ -39,10 +37,12 @@ export function set(obj: any, key: any, value?: any): void {
 export function has(obj: any, key: any): boolean {
   if (isObservableObject(obj)) {
     return obj[$mobx].has(key);
-  } if (isObservableArray(obj)) {
+  }
+  if (isObservableArray(obj)) {
     const k = !isNaN(key) && (isNumber(key) || isNumber(+key)) ? +key : null;
     return k !== null && k >= 0 && k < obj.length;
-  } if (isObservableMap(obj)) {
+  }
+  if (isObservableMap(obj)) {
     return obj[$mobx].has(key);
   }
 
@@ -55,9 +55,11 @@ export function get(obj: any, key: any) {
   }
   if (isObservableObject(obj)) {
     return obj[key];
-  } if (isObservableArray(obj)) {
+  }
+  if (isObservableArray(obj)) {
     return obj[key];
-  } if (isObservableMap(obj)) {
+  }
+  if (isObservableMap(obj)) {
     return obj.get(key);
   }
 
