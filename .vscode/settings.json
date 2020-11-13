@@ -3,6 +3,11 @@
     "editor.formatOnSave": true,
     "editor.formatOnPaste": false
   },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "prettier.requireConfig": true,
+  "editor.formatOnSave": true,
   "[javascript]": {
     "editor.formatOnSave": true,
     "editor.formatOnPaste": false
