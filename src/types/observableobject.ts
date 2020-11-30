@@ -2,7 +2,7 @@
  * @Author: Rainy
  * @Date: 2020-09-05 17:57:06
  * @LastEditors: Rainy
- * @LastEditTime: 2020-10-09 20:41:54
+ * @LastEditTime: 2020-11-13 10:05:17
  */
 
 import {
@@ -19,20 +19,69 @@ import {
   referenceEnhancer,
   defineProperty,
   IComputedValueOptions,
-  ComputedValue
+  ComputedValue,
+  getNextId,
+  isPlainObject,
+  hasInterceptors,
+  IInterceptable,
+  interceptChange,
+  registerListener,
+  Lambda,
+  registerInterceptor
 } from '../internal';
 
 export function isObservableObject(thing: any) {
   return isObservable(thing) && thing[$mobx].isObservableObject;
 }
 
+export type IObjectDidChange<T = any> = {
+  observableKind: 'object';
+  name: PropertyKey;
+  object: T;
+  debugObjectName: string;
+} & (
+  | {
+      type: 'add';
+      newValue: any;
+    }
+  | {
+      type: 'update';
+      oldValue: any;
+      newValue: any;
+    }
+  | {
+      type: 'remove';
+      newValue: any;
+    }
+);
+
+export type IObjectWillChange<T = any> =
+  | {
+      object: T;
+      type: 'update' | 'add';
+      name: PropertyKey;
+      newValue: any;
+    }
+  | {
+      object: T;
+      type: 'remove';
+      name: PropertyKey;
+    };
+
+export const ADD = 'add';
+export const DELETE = 'delete';
+export const REMOVE = 'remove';
+
 /**
  * @description 可观察对象管理
  */
-export class ObservableObjectAdministration {
+export class ObservableObjectAdministration implements IInterceptable<IObjectWillChange> {
   keysAtom: IAtom;
   proxy: any;
-  pendingKeys: undefined | Map<PropertyKey, ObservableValue<boolean>>;
+  interceptors;
+  changeListeners;
+
+  private pendingKeys: undefined | Map<PropertyKey, ObservableValue<boolean>>;
   private keysValue: (string | number | symbol)[] = [];
   // INFO: 是否固定 keysValue 的取值
   private isStaledKeysValue = true;
@@ -50,7 +99,25 @@ export class ObservableObjectAdministration {
     return this.values.get(key)!.get();
   }
 
-  write() {}
+  write(key: PropertyKey, newValue) {
+    const instance = this.target;
+    const observable = this.values.get(key);
+
+    if (observable instanceof ComputedValue) {
+      observable.set(newValue);
+      return;
+    }
+  }
+
+  remove(key: PropertyKey) {}
+
+  observe(callback: (changes: IObjectDidChange) => void, fireImmediately: boolean): Lambda {
+    return registerListener(this, callback);
+  }
+
+  intercept(handler): Lambda {
+    return registerInterceptor(this, handler);
+  }
 
   has(key: PropertyKey) {
     const map = this.pendingKeys || (this.pendingKeys = new Map());
@@ -74,6 +141,22 @@ export class ObservableObjectAdministration {
     enhancer: IEnhancer<any> = this.defaultEnhancer
   ) {
     const { target } = this;
+
+    if (hasInterceptors(this)) {
+      const change = interceptChange<IObjectWillChange>(this, {
+        object: this.proxy || target,
+        name: propName,
+        type: ADD,
+        newValue
+      });
+
+      if (!change) {
+        return;
+      }
+
+      newValue = (change as any).newValue;
+    }
+
     const observable = new ObservableValue(
       newValue,
       enhancer,
@@ -162,6 +245,14 @@ export function asObservableObject(
 ) {
   if (hasProp(target, $mobx)) {
     return target[$mobx];
+  }
+
+  if (!isPlainObject(target)) {
+    name = `${target.constructor.name || 'ObservableObject'}@${getNextId()}`;
+  }
+
+  if (!name) {
+    name = `ObservableObject@${getNextId()}`;
   }
 
   const adm = new ObservableObjectAdministration(

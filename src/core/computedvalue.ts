@@ -2,7 +2,7 @@
  * @Author: Rainy
  * @Date: 2020-10-03 15:29:06
  * @LastEditors: Rainy
- * @LastEditTime: 2020-10-09 20:45:37
+ * @LastEditTime: 2020-11-13 10:36:59
  */
 
 import {
@@ -30,10 +30,13 @@ export interface IComputedValueOptions<T> {
 export class ComputedValue<T> {
   name: string;
   setter?: (value: T) => void;
-  private equals?: IEqualsComparer<any>;
-  requiresReaction: boolean;
   keepAlive: boolean;
+  isRunningSetter: boolean = false;
+
   protected value: T | undefined | CaughtException = new CaughtException(null);
+  private equals?: IEqualsComparer<any>;
+  private requiresReaction: boolean;
+  scope: Object | undefined;
 
   constructor(options: IComputedValueOptions<T>) {
     if (!options.get) {
@@ -62,6 +65,24 @@ export class ComputedValue<T> {
     }
 
     return result;
+  }
+
+  public set(value: T) {
+    if (this.setter) {
+      if (this.isRunningSetter) {
+        reportError(`[ComputedValue ${this.name}]无法将新值分配给计算值。`);
+      }
+
+      this.isRunningSetter = true;
+
+      try {
+        this.setter.call(this.scope, value);
+      } finally {
+        this.isRunningSetter = false;
+      }
+    } else {
+      reportError(`[ComputedValue ${this.name}]无法将新值分配给计算值。`);
+    }
   }
 }
 

@@ -2,10 +2,12 @@
  * @Author: Rainy
  * @Date: 2020-10-03 16:50:00
  * @LastEditors: Rainy
- * @LastEditTime: 2020-10-09 19:42:18
+ * @LastEditTime: 2020-11-12 17:46:36
  */
 
 import {
+  addHiddenProp,
+  action,
   ACTION,
   ACTION_BOUND,
   AUTOACTION,
@@ -31,6 +33,10 @@ import {
 } from '../internal';
 import { Annotation } from './annotation';
 
+function makeAction(target: Object, key: PropertyKey, name, fn, asAutoAction: boolean) {
+  addHiddenProp(target, key, asAutoAction ? autoAction(name || key, fn) : action(name || key, fn));
+}
+
 export function makeProperty(
   adm: ObservableObjectAdministration,
   owner: Object,
@@ -39,6 +45,9 @@ export function makeProperty(
   annotation: Annotation | boolean,
   // 可观察的扩展将 被复制 甚至未注释的属性, 所有拓展属性都会被观察
   forceCopy: boolean,
+  // INFO: docs/action.md -> @action.bound classMethod() {}
+  // @action.bound 创建有范围的动作, 不需要 name 函数,
+  // 自动绑定上下文对象, 名称将始终基于动作绑定的属性。
   autoBind: boolean
 ): void {
   const { target } = adm;
@@ -71,6 +80,13 @@ export function makeProperty(
         reportError('action 只能用于具有函数值的属性');
       }
 
+      const realTarget: Object | null =
+        owner !== target && !forceCopy ? (isAction(owner[key]) ? null : owner) : target;
+
+      if (realTarget) {
+        makeAction(realTarget, key, annotation.args, fn, type === AUTOACTION);
+      }
+
       break;
     }
     case AUTOACTION_BOUND:
@@ -80,12 +96,20 @@ export function makeProperty(
         reportError('action 只能用于具有函数值的属性');
       }
 
+      makeAction(
+        target,
+        key,
+        annotation.args,
+        fn.bind(adm.proxy || target),
+        type === AUTOACTION_BOUND
+      );
       break;
     }
 
     case FLOW: {
       if (owner !== target && !forceCopy) {
       } else {
+        addHiddenProp(target, key, flow(descriptor.value));
       }
 
       break;
@@ -96,6 +120,13 @@ export function makeProperty(
       if (!descriptor.get) {
         reportError('computed 只能用于 getter 属性。');
       }
+
+      adm.addComputedProp(target, key, {
+        get: descriptor.get,
+        set: descriptor.set,
+        compareStructural: annotation.annotationType === COMPUTED_STRUCT,
+        ...annotation.args
+      });
       break;
     }
 

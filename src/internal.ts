@@ -2,7 +2,7 @@
  * @Author: Rainy
  * @Date: 2020-09-05 10:43:33
  * @LastEditors: Rainy
- * @LastEditTime: 2020-10-07 17:24:59
+ * @LastEditTime: 2020-11-12 22:10:26
  */
 
 // utils
@@ -53,5 +53,7 @@ export * from './types/observableobject';
 export * from './types/observableset';
 export * from './types/observablevalue';
 export * from './types/type-utils';
+export * from './types/listen-utils';
+export * from './types/intercept-utils';
 
 export * from './error';

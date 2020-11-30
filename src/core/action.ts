@@ -2,7 +2,7 @@
  * @Author: Rainy
  * @Date: 2020-09-26 12:14:12
  * @LastEditors: Rainy
- * @LastEditTime: 2020-09-30 16:23:10
+ * @LastEditTime: 2020-11-13 13:57:19
  */
 
 import { defineProperty, getDescriptor } from '../internal';
@@ -16,6 +16,14 @@ const actionDescriptor: PropertyDescriptor = {
   writable: false
 };
 
+/**
+ * @description 创建 action
+ * @param  {string} actionName
+ * @param  {Function} fn
+ * @param  {boolean=false} autoAction
+ * @param  {Object} ref?
+ * @returns Function
+ */
 export function createAction(
   actionName: string,
   fn: Function,

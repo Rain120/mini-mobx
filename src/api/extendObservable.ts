@@ -2,7 +2,7 @@
  * @Author: Rainy
  * @Date: 2020-10-03 16:00:48
  * @LastEditors: Rainy
- * @LastEditTime: 2020-10-03 17:05:51
+ * @LastEditTime: 2020-11-12 17:13:25
  */
 
 import {
@@ -28,6 +28,7 @@ export function extendObservable<A extends Object, B extends Object>(
   const opts = asCreateObservableOptions(options);
   const adm = asObservableObject(target, opts.name, getEnhancerFromOptions(opts));
 
+  // INFO: 统计批量处理的个数
   startBatch();
 
   try {
@@ -46,11 +47,13 @@ export function extendObservable<A extends Object, B extends Object>(
         key,
         descriptors[key as any],
         !annotations ? true : key in annotations ? annotations[key as any] : true,
+        // 可观察的扩展将 被复制 甚至未注释的属性, 所有拓展属性都会被观察
         true,
         !!options?.autoBind
       );
     });
   } finally {
+    // INFO: 处理 reaction
     endBatch();
   }
 
